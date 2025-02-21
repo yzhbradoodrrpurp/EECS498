@@ -6,6 +6,7 @@
 
 import torch
 from LinearClassifier import LinearClassifier
+
 class SoftmaxClassifier(LinearClassifier):
     def loss(self, X, y, regularization):
         """
