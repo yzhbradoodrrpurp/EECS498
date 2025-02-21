@@ -5,11 +5,11 @@
 ### 标量函数
 
 - $f(\boldsymbol{x}) = \boldsymbol{a}^T \boldsymbol{x}$ ，其中 $\boldsymbol{a}, \boldsymbol{x}$ 都是 $n * 1$ 的列向量，则 $\frac{\partial{f}}{\partial{\boldsymbol{x}}} = \boldsymbol{a}$
-- $f(\boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol{x}$ 是 $n * 1$ 的列向量，$\boldsymbol{A}$ 是 $n * n$ 的矩阵，则 $\frac{\partial{f}}{\partial{\boldsymbol{x}}} = 2 \boldsymbol{A} \boldsymbol{x}$
+- $f(\boldsymbol{x}) = \boldsymbol{x}^T \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol{x}$ 是 $n * 1$ 的列向量，$\boldsymbol{A}$是 $n * n$ 的矩阵，则 $\frac{\partial{f}}{\partial{\boldsymbol{x}}} = 2 \boldsymbol{A} \boldsymbol{x}$
 
 ### 向量函数
 
-$f(\boldsymbol x) = \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol A$ 是 $m * n$ 的矩阵，$\boldsymbol x$ 是 $n * 1$ 的向量，则 $\frac{\partial f}{\partial \boldsymbol x} = \boldsymbol A$
+$f(\boldsymbol x) = \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol A$ 是 $m * n$ 的矩阵，$\boldsymbol x$是 $n * 1$ 的向量，则 $\frac{\partial f}{\partial \boldsymbol x} = \boldsymbol A$
 
 ## 推导SVM Loss的梯度
 
@@ -33,9 +33,9 @@ $f(\boldsymbol x) = \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol A$ 是
 - 如果 $j \neq y_i$ 且 $s_j - s_{y_i} + \Delta > 0$ ，则 $\frac{\partial L_i}{\partial \boldsymbol W_j} = \boldsymbol x^T$
 - 如果 $j \neq y_i$ 且 $s_j - s_{y_i} + \Delta \le 0$ ，则 $\frac{\partial L_i}{\partial \boldsymbol W_j} = 0$
 
-那么对于 $W_{y_i}$ 的梯度，$\frac{\partial L_i}{\partial \boldsymbol W_{y_i}} = \sum_{j \neq y_i}{-\boldsymbol x^T} \cdot \boldsymbol{1}_{(s_j - s_{y_i} + \Delta > 0)}$
+那么对于 $W_{y_i}$ 的梯度，$\frac{\partial L_i}{\partial \boldsymbol W_{y_i}} = \sum_{j \neq y_i}{-\boldsymbol x^T} \cdot \boldsymbol{1} {(s_j - s_{y_i} + \Delta > 0)}$
 
-- $\boldsymbol{1}_{(s_j - s_{y_i} + \Delta > 0)}$ 是指示函数，表明括号中条件成立时，值为1；不成立时，值为0
+- $\boldsymbol{1} {(s_j - s_{y_i} + \Delta > 0)}$ 是指示函数，表明括号中条件成立时，值为1；不成立时，值为0
 
 ### 在整个训练集上
 
