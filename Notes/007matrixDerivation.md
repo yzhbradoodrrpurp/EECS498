@@ -33,7 +33,7 @@ $f(\boldsymbol x) = \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol A$ 是
 - 如果 $j \neq y_i$ 且 $s_j - s_{y_i} + \Delta > 0$ ，则 $\frac{\partial L_i}{\partial \boldsymbol W_j} = \boldsymbol x_i^T$
 - 如果 $j \neq y_i$ 且 $s_j - s_{y_i} + \Delta \le 0$ ，则 $\frac{\partial L_i}{\partial \boldsymbol W_j} = 0$
 
-那么对于 $W_{y_i}$ 的梯度，$\frac{\partial L_i}{\partial \boldsymbol W_{y_i}} = \sum_{j \neq y_i}{- \boldsymbol x_i^T} \cdot \boldsymbol{1} {(s_j - s_{y_i} + \Delta > 0)}$
+那么对于 $W_{y_i}$ 的梯度, $\frac{\partial L_i}{\partial \boldsymbol W_{y_i}} = \sum_{j \neq y_i}{- \boldsymbol x_i^T} \cdot \boldsymbol{1} {(s_j - s_{y_i} + \Delta > 0)}$
 
 - $\boldsymbol{1} {(s_j - s_{y_i} + \Delta > 0)}$ 是指示函数，表明括号中条件成立时，值为1；不成立时，值为0
 
@@ -67,7 +67,7 @@ $f(\boldsymbol x) = \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol A$ 是
 > Softmax函数有两个重要性质:
 >
 > - $\frac{\partial p_j}{\partial s_j} = p_j (1 - p_j)$
-> - $\frac{p_k}{s_j} = - p_k p_j$ , $j \neq k$
+> - $\frac{\partial p_k}{\partial s_j} = - p_k p_j$ , $j \neq k$
 >
 > $\frac{\partial L_i}{\partial s_j} = \frac{\partial (-\log{p_{y_i}})}{\partial s_j} = - \frac{1}{p_{y_i}} \cdot \frac{\partial p_{y_i}}{\partial s_j}$
 >
