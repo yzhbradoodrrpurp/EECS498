@@ -41,7 +41,7 @@ $f(\boldsymbol x) = \boldsymbol{A} \boldsymbol{x}$ ，其中 $\boldsymbol A$ 是
 
 将所有样本的梯度相加并取平均值，就得到了在整个训练集上的梯度: $\frac{\partial L}{\partial \boldsymbol W} = \frac{1}{N} \sum_{i=1}^{N}{\frac{\partial L_i}{\partial \boldsymbol W}}$
 
-## 推导Cross-Entropy Loss梯度
+## 推导Cross-Entropy Loss的梯度
 
 ### 对于单个样本
 
