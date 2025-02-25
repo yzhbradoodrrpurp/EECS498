@@ -52,12 +52,75 @@
 
 ![multiconvolayers](Images/multiconvolayers.png)
 
-## 改进方法
+## Several Issues
 
 ### Problem 1: Shrinking Size of Hidden Layers
 
-每经过一次卷积层，隐藏层的宽度和高度会越来越小，这样就会限制住卷积的次数。
+假设某一层输入的宽度和高度为W，卷积核的宽度和高度为K，那么该层输出的宽度和高度就为W-K+1。也就是说每经过一次卷积层，隐藏层的宽度和高度会越来越小，这样就会限制住卷积的次数。
 
-> [见上图](# 多个卷积层): $N \times 3 \times 32 \times 32 \rightarrow N \times 6 \times 28 \times 28 \rightarrow N \times 26 \times 26$ , 每一层的宽度和高度越来越小。
+> [见上图](#多个卷积层): $N \times 3 \times 32 \times 32 \rightarrow N \times 6 \times 28 \times 28 \rightarrow N \times 26 \times 26$ , 每一层的宽度和高度越来越小。
 
 ### Solution 1: Padding
+
+在每一层的输入数据周围添加0，能够避免隐藏层的大小越来越小。假设某一层输入的宽度和高度为W，卷积核的宽度和高度为K，Padding的圈数为P，那么输出的宽度和高度就为W-K+1+2P。为了保持输出的宽度和高度不变，一个常见的做法是将P设置为 $\frac{K-1}{2}$ 。
+
+> 填充为0的原因：
+>
+> - 保持计算的简洁：填充为0不会引入新的信息或者改变卷积的结构，从而不会影响到学习到的特征
+> - 减少对模型训练的干扰：如果填充使用非零值，比如使用某个常数或者均值等，卷积操作就会受到这些值的影响，可能会使得网络学习到不合理的特征
+
+![padding](Images/padding.png)
+
+### Problem 2: Receptive Field
+
+**感受野** (Receptive Field) 指的是**激活图中某一特定的单元能够“看到”的区域**，也就是在上一层中有哪些元素影响了它。感受野决定了激活图中每个单元能够提取到的信息量，较大的感受野能够捕捉到更广泛的特征，关注到整体上的信息。
+
+![receptivefield](Images/receptivefield.png)
+
+通常提高感受野的方式为使用更多卷积层，这样就能够提高激活图中每一个单元的感受野。但是问题在于对于很大的图像，我们需要很多个卷积层才能捕捉更整体上的信息，会增加很大的计算开销。
+
+### Solution 2: Strided Convolution
+
+改变卷积核每次滑动的步长，将标准卷积 (stride=1) 中的步长提高。总的来说，如果输入的宽度和高度为W，卷积核的宽度和高度为K，Padding的圈数为P，Stride步长为S，那么输出的宽度和高度为 $\frac{W - K + 2P}{S} + 1$ 。
+
+- 扩大stride步长能够提高感受野，同时避免过大的计算开销
+- 扩大stride步长会损失部分局部信息，可能会影响模型的精度
+
+> 通常我们会根据输入的宽度和高度来选择能够整除的步长。
+
+![stride](Images/stride.gif)
+
+## Pooling Layer
+
+池化 (Pooling) 是另一种减少采样 (Downsample) ，节约计算开销的方式。它可以缩小输入层/隐藏层的大小，但会失去一些精度。
+
+![poolinglayer](Images/poolinglayer.png)
+
+常见的Pooling方式是Max Pooling，它会将输入样本的宽度和高度划分为不重复的区域，然后选取出每个区域内最大的值，组成一个新的样本。
+
+![maxpooling](Images/maxpooling.png)
+
+## Pipeline of LeNet-5
+
+LeNet-5是一个经典的卷积神经网络架构，由Yann LeCun等人于1998年提出，通常用于手写识别等图像分类问题上。LeNet-5是深度学习领域的一个里程碑，展示了卷积神经网络在实际问题中的有效性。
+
+LeNet-5的流程如下：
+
+- 输入灰色图片，形状为1\*28\*28
+- 经过一次卷积层，有20个卷积核，大小都为1\*5\*5，得到大小为20\*28\*28的隐藏层；经过ReLU激活函数后的隐藏层大小不变
+- 经过一次池化层，隐藏层规模缩小到20\*14\*14
+- 再次重复一遍以上过程，不过具体的参数有所改变
+- 将得到的隐藏层平展
+- 经过一次全连接层 (Linear + ReLU + Linear) ，得到最终的10个分类分数。
+
+![lenet-5](Images/lenet-5.png)
+
+随着神经网络的进行，我们可以发现两个特征：
+
+- Spatial size decreases (using pooling or strided convolution)
+- Number of channels increases (total volume is preserved)
+
+以后会解释为什么是这样的。
+
+## Normalization
+
