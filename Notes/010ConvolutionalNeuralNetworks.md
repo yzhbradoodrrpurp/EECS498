@@ -124,3 +124,38 @@ LeNet-5的流程如下：
 
 ## Normalization
 
+对某一层的输出进行归一化 (Normalization) ，让它们的均值为0并且得到统一的方差，公式为: $\hat{x}^{(k)} = \frac{x^{(k)} - E(x^{(k)})}{\sqrt{Var(x^{(k)})}}$
+
+为什么需要归一化：
+
+- 让深度神经网络更容易训练
+- 允许设置更大的学习率，更快地让损失函数收敛
+- 使神经网络在初始化时更加健壮
+
+### Batch Normalization
+
+对于二维输入数据，批量归一化计算方法如下：
+
+![bn2d](Images/bn2d.png)
+
+由于这样计算出来的结果“太硬”，通常会使用可学习参数进行缩放和偏移：
+
+![bn2d_](Images/bn2d_.png)
+
+四维输入数据的批量归一化是类似的，和二维的对比如下：
+
+![contrast2d4d](Images/contrast2d4d.png)
+
+批量归一化通常放在全连接层/卷积层之后，激活函数之前：
+
+![wherebn](Images/wherebn.png)
+
+注意: **使用batch normalization时，在train-time和test-time是有区别的**。在train-time时，使用mini-batch的均值和方差来得到归一化后的结果 (如以上流程所示)；在test-time时，使用train-time时的全局均值和方差来得到归一化之后的结果 (使用全局的均值代替 $u_j$ ，全局方差代替 $\sigma_j$)。
+
+> During testing, batch normalization becomes a linear operator because the average and variance are fixed values.
+>
+> Since batch normalization is a linear operator, it can be fused with its previous layer.
+
+### Other normalization
+
+Layer Normalization, Instance Normalization, Group Normalization...
