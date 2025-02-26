@@ -7,6 +7,7 @@
 ## 进度
 
 - 2025.2.7: 创建了此仓库
-- 2025.2.8: 完成了[PyTorch基础](Assignments/pytorch101.ipynb)
-- 2025.2.9: 完成了[kNN Classifier](Assignments/kNN.ipynb)
-- 2025.2.20: 完成了[SVM Classifier和Softmax Classifier](Assignments/linear_classifier.ipynb)
+- 2025.2.8: 完成了[PyTorch基础](Assignments/A1/pytorch101.ipynb)
+- 2025.2.9: 完成了[kNN Classifier](Assignments/A1/kNN.ipynb)
+- 2025.2.20: 完成了[SVM Classifier和Softmax Classifier](Assignments/A2/linear_classifier.ipynb)
+- 2025.2.26: 完成了[Two-Layer Neural Networks](Assignments/A2/two_layer_net.ipynb)
