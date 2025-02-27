@@ -80,9 +80,6 @@ class LinearClassifier:
         :param batch: batch size
         :return: X and y in batch
         """
-        m, n = X.shape
-        c = y.max() + 1
-
+        m = X.shape[0]
         indices = torch.randint(0, m, (batch,))
-
         return X[indices, :], y[indices]
