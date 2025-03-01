@@ -37,7 +37,7 @@ Leaky ReLU就是为了防止出现Dead ReLU Problem而出现的，它不会出�
 
 对于像ReLU这样的激活函数，通常使用**Kaiming / MSRA Initialization**。
 
-## Regularization
+## 正则化
 
 ### Prevoius Methods
 
@@ -55,11 +55,9 @@ p = 0.5
 def train():
   hidden_layer = X @ W1 + b1
   hidden_layer[hidden_layer < 0] = 0 # ReLU
-
   binary = (torch.rand(*hidden_layer) < p).to(hidden_layer.dtype)
   hidden_layer *= binary # drop!
-
-	scores = hidden_layer @ W2 + b2
+  scores = hidden_layer @ W2 + b2
   
   loss = ...
   gradients = ...
@@ -76,3 +74,22 @@ def predict():
 ### Data Augmentation
 
 ...
+
+## 合适的学习率
+
+### Learning Rate Decay
+
+- Step Learning Rate Decay: 根据循环的次数，逐渐减少学习率
+
+![steplearningratedecay](Images/steplearningratedecay.png)
+
+- Cosine Learning Rate Decay: $lr_t = \frac{1}{2} lr_t(1 + \cos(\frac{\pi t}{T}))$
+
+![cosinelearningratedecay](Images/cosinelearningratedecay.png)
+
+- Linear Learning Rate Decay: $lr_t = lr_0 (1 - \frac{t}{T})$
+
+![linearlearningratedecay](Images/linearlearningratedecay.jpg)
+
+使用SGD或者SGD + Momentum优化方法时，搭配learning rate decay，效果可能会更好；使用RMSProp或者Adam时，使用静态的学习率就行了。
+
