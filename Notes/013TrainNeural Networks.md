@@ -91,5 +91,21 @@ def predict():
 
 ![linearlearningratedecay](Images/linearlearningratedecay.jpg)
 
-使用SGD或者SGD + Momentum优化方法时，搭配learning rate decay，效果可能会更好；使用RMSProp或者Adam时，使用静态的学习率就行了。
+**使用SGD或者SGD + Momentum优化方法时，搭配learning rate decay，效果可能会更好；使用RMSProp或者Adam时，使用静态的学习率就行了**。
 
+## Transfer Learning
+
+迁移学习的核心思想是避免从头开始训练一个模型，而是对一个已经预训练好了的模型进行特定的优化，使其适应新的任务。这样做的好处是：
+
+- 减少计算成本，不用从头开始训练大模型
+- 降低数据需求，新的任务可能没有大量数据，但是这也没关系，因为预训练的模型已经学习到了一般的特征
+- 加开训练速度，直接在已有的模型基础上进行调整
+
+### 迁移学习的流程
+
+- 选择一个预训练模型 (最好是已经在大型数据集上训练过的模型) ，比如在ImageNet上训练好的ResNet，或者在大型语料库上训练好的BERT等等
+- **冻结前面的卷积层用它们来提取输入的特征 (Feature Extraction) ，仅仅训练后面的全连接层 (Fine-tuning)**
+
+> 在深度学习中，前几层通常学习到的是低级特征，比如颜色、纹理等等；中间层学习到的是模式和形状，比如轮廓等等；后面几层学习到的是高级特征，更加整体的信息. **如果新任务和原任务相似的话，那么低级特征和中级特征是通用的，只需要训练高级特征就行了**。
+
+![transferlearning](Images/transferlearning.png)
