@@ -50,6 +50,10 @@
 
 多个卷积核组成了一个卷积层，可以使用多个卷积层提取输入数据中的信息，另外别忘了使用激活函数改变线性结构。
 
+> - 第一个卷积层的通道数是输入数据的通道数，在彩色图像数据中，就是3
+>
+> - **后面卷积层的通道数是上一个卷一层的卷积核的个数**
+
 ![multiconvolayers](Images/multiconvolayers.png)
 
 ## Several Issues
@@ -96,7 +100,7 @@
 
 ![poolinglayer](Images/poolinglayer.png)
 
-常见的Pooling方式是Max Pooling，它会将输入样本的宽度和高度划分为不重复的区域，然后选取出每个区域内最大的值，组成一个新的样本。
+常见的Pooling方式是Max Pooling，它会将输入样本的宽度和高度划分为小区间，然后选取出每个区间内最大的值，组成一个新的样本。下图中的Max Pooling是pooling kernel的宽度和高度都为2，步长为2。
 
 ![maxpooling](Images/maxpooling.png)
 
