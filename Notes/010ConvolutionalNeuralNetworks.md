@@ -28,12 +28,15 @@
 
 **当激活函数是对称的、以0为中心时，可以使用Xavier Initialization**。Xavier 初始化的目的是保持前向传播和反向传播过程中信号的方差稳定，防止梯度消失或爆炸。
 
-- 对于全连接层：`W = torch.randn(Dimensions, Classes) / Dimensions`
-- 对于卷积层：`W = torch.randn(Channels, Weights, Heights) / (Channels * KernelSize * KernelSize)`
+- 对于全连接层：`W = torch.randn(Dimensions, Classes) / Dimensions.sqrt()`
+- 对于卷积层：`W = torch.randn(Channels, Heights, Weights) / (Channels * KernelSize * KernelSize).sqrt()`
 
 ### Kaiming Initialization
 
 对于像ReLU这样的非对称、非以0为中心的激活函数，通常使用**Kaiming Initialization**。
+
+- 对于全连接层：`W = torch.randn(Dimensions, Classes) * (2 / Dimensions).sqrt()`
+- 对于卷积层：`W = torch.randn(Channels, Heights, Weights) * (2 / (Channels * KernelSize * KernelSize)).sqrt()`
 
 ## 合适的学习率
 
