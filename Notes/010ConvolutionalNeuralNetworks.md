@@ -38,6 +38,8 @@
 - 对于全连接层：`W = torch.randn(Dimensions, Classes) * (2 / Dimensions).sqrt()`
 - 对于卷积层：`W = torch.randn(Channels, Heights, Weights) * (2 / (Channels * KernelSize * KernelSize)).sqrt()`
 
+> 只有权重需要进行Xavier Initialization或者Kaiming Initialization，偏差一般全部初始化为0。
+
 ## 合适的学习率
 
 ### Learning Rate Decay
@@ -155,6 +157,14 @@ def predict():
 > - 保持计算的简洁：填充为0不会引入新的信息或者改变卷积的结构，从而不会影响到学习到的特征
 > - 减少对模型训练的干扰：如果填充使用非零值，比如使用某个常数或者均值等，卷积操作就会受到这些值的影响，可能会使得网络学习到不合理的特征
 
+````python
+import torch.nn.functional as f
+
+# X: (N, C, H, W)
+X_padded = f.pad(X, (left, right, up, down))
+# X_padded: (N, C, up + H + down, left + W + right)
+````
+
 ![padding](Images/padding.png)
 
 #### Problem 2: Receptive Field
@@ -182,9 +192,9 @@ def predict():
 
 为什么需要归一化：
 
-- 让深度神经网络更容易训练
-- 允许设置更大的学习率，更快地让损失函数收敛
-- 使神经网络在初始化时更加健壮
+- **让深度神经网络更容易训练**
+- **允许设置更大的学习率，更快地让损失函数收敛**
+- **使神经网络在初始化时更加健壮**
 
 ### Batch Normalization
 
@@ -196,23 +206,53 @@ def predict():
 
 ![bn2d_](Images/bn2d_.png)
 
+````python
+N, D = X.shape # (N, D)
+epsilon = 1e-9 # 防止出现除以0的情况
+
+mean = X.mean(dim=0) # (D,)
+var = X.var(dim=0, unbiased=False) # (D,) 无偏估计：unbiased=True 有偏估计：unbiased=False
+
+center = (X - mean) / var # (N, D)
+
+# gamma: (D,) beta: (D,)
+result = gamma * center + beta # (N, D)
+````
+
 四维输入数据的批量归一化是类似的，和二维的对比如下：
 
 ![contrast2d4d](Images/contrast2d4d.png)
 
-**批量归一化通常放在全连接层/卷积层之后，激活函数之前**：
+````python
+N, C, H, W = X.shape # (N, C, H, W)
+epsilon = 1e-9
+
+# 计算出X中每个通道在batch中的mean和var：
+
+# (N, C, H, W) -> (N, H, W, C) -> (N * H * W, C)
+X_reshaped = X.permute(0, 2, 3, 1).reshape(-1, C)
+
+# 接下来和二维类似了
+mean = X_reshaped.mean(dim=0)
+var = X_reshaped.var(dim=0, unbiased=False)
+center = (X_reshaped - mean) / (var + epsilon).sqrt()
+
+# 将形状变回来: (N * H * W, C) -> (N, H, W, C) -> (N, C, H, W)
+center = center.reshape(N, H, W, C).permute(0, 3, 1, 2).contiguous()
+
+# gamma: (1, C, 1, 1) beta: (1, C, 1, 1)
+result = gamma * center + beta
+````
+
+批量归一化通常放在全连接层/卷积层之后，激活函数之前：
 
 ![wherebn](Images/wherebn.png)
 
-注意: **使用batch normalization时，在train-time和test-time是有区别的**。在train-time时，使用mini-batch的均值和方差来得到归一化后的结果 (如以上流程所示)；在test-time时，使用train-time时的全局均值和方差来得到归一化之后的结果 (使用全局的均值代替 $u_j$ ，全局方差代替 $\sigma_j$)。
+注意: **使用batch normalization时，在train-time和test-time是有区别的**。在train-time时，使用mini-batch的均值和方差来得到归一化后的结果 (如以上流程所示)；在test-time时，使用train-time时的全局均值和方差来得到归一化之后的结果 (使用全局的均值代替 $u_j$ ，全局方差代替 $\sigma_j$)。有时在test-time也使用其它的方法来进行归一化，比如在[A3作业中的CNN](../Assignments/A3/convolutional_networks.ipynb)就用了running average来计算mean和var，进而计算中心。
 
 > During testing, batch normalization becomes a linear operator because the average and variance are fixed values.
 >
 > Since batch normalization is a linear operator, it can be fused with its previous layer.
-
-### Other normalization
-
-Layer Normalization, Instance Normalization, Group Normalization...
 
 ## Activation Layer
 
