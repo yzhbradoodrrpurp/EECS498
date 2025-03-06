@@ -12,3 +12,4 @@
 - 2025.2.20: 完成了[SVM Classifier和Softmax Classifier](Assignments/A2/linear_classifier.ipynb)
 - 2025.2.26: 完成了[Two-Layer Neural Networks](Assignments/A2/two_layer_net.ipynb)
 - 2025.3.2: 完成了[Fully-Connected Neural Networks](Assignments/A3/fully_connected_networks.ipynb)
+- 2025.3.7: 完成了[Convolutional Neural Networks](Assignments/A3/convolutional_networks.ipynb) 
