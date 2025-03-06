@@ -16,11 +16,11 @@
 
 一般会将训练数据标准化，便于后续进行优化。
 
-![normalization](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/normalization.png)
+![normalization](Images/normalization.png)
 
 在其它某些情况中，可能会使用PCA或者Whitening的方法。
 
-![pca_whitening](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/pca_whitening.png)
+![pca_whitening](Images/pca_whitening.png)
 
 ## 初始化参数
 
@@ -41,15 +41,15 @@
 
 - Step Learning Rate Decay: 根据循环的次数，逐渐减少学习率
 
-![steplearningratedecay](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/steplearningratedecay.png)
+![steplearningratedecay](Images/steplearningratedecay.png)
 
 - Cosine Learning Rate Decay: $lr_t = \frac{1}{2} lr_0(1 + \cos(\frac{\pi t}{T}))$
 
-![cosinelearningratedecay](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/cosinelearningratedecay.png)
+![cosinelearningratedecay](Images/cosinelearningratedecay.png)
 
 - Linear Learning Rate Decay: $lr_t = lr_0 (1 - \frac{t}{T})$
 
-![linearlearningratedecay](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/linearlearningratedecay.jpg)
+![linearlearningratedecay](Images/linearlearningratedecay.jpg)
 
 **使用SGD或者SGD + Momentum优化方法时，搭配learning rate decay，效果可能会更好；使用RMSProp或者Adam时，使用静态的学习率就行了**。
 
@@ -215,7 +215,7 @@ Layer Normalization, Instance Normalization, Group Normalization...
 
 目前已经了解到激活函数有：
 
-![activation](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/activation.png)
+![activation](Images/activation.png)
 
 Sigmoid和tanh都不是很好的选择，因为在函数的两端曲线都非常平，梯度很小，导致在反向传播时很有可能出现**梯度消失**的问题。
 
