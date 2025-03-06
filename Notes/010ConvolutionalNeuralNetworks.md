@@ -1,12 +1,91 @@
 # Convolutional Neural Networks
 
-## Why convolutional neural networks
+## Why CNN
 
 之前我们学习的神经网络中的层叫做**全连接层 (fully-connected layer)**, 全连接层会**丧失输入的空间结构信息**，因为它会将输入特征都展开为一维向量然后再进行训练，不考虑输入特征的空间结构信息。
 
 ![fullyconnectedlayer](Images/fullyconnectedlayer.png)
 
-为了训练出准确度更高的模型，我们需要卷积神经网络。
+为了训练出准确度更高的模型，我们需要卷积神经网络。卷积神经网络一般的流程：
+
+输入层 $\rightarrow$ ([卷积层](#Convolutional-Layer) $\rightarrow$ [归一化层](#Normalization-Layer) $\rightarrow$ [激活层](#Activation-Layer)) * N $\rightarrow$ 全连接层 $\rightarrow$ 输出层
+
+当然，在正式开始之前还有一系列的准备工作需要完成，比如[对训练数据进行预处理](#数据预处理)，便于后续进行梯度下降；比如[初始化神经元的参数](#初始化参数)，找到最合适的训练起点；比如[设置合适的学习率](#合适的学习率)，提高训练的效率；[寻找合适的正则化](#正则化)，避免出现过拟合的情况等等。在模型训练完毕之后，可能会迁移到其它模型中，这时候我们会讲一讲[迁移学习](#Transfer-Learning)是怎么回事。
+
+## 数据预处理
+
+一般会将训练数据标准化，便于后续进行优化。
+
+![normalization](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/normalization.png)
+
+在其它某些情况中，可能会使用PCA或者Whitening的方法。
+
+![pca_whitening](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/pca_whitening.png)
+
+## 初始化参数
+
+### Xavier Initialization
+
+**当激活函数是对称的、以0为中心时，可以使用Xavier Initialization**。Xavier 初始化的目的是保持前向传播和反向传播过程中信号的方差稳定，防止梯度消失或爆炸。
+
+- 对于全连接层：`W = torch.randn(Dimensions, Classes) / Dimensions`
+- 对于卷积层：`W = torch.randn(Channels, Weights, Heights) / (Channels * KernelSize * KernelSize)`
+
+### Kaiming Initialization
+
+对于像ReLU这样的非对称、非以0为中心的激活函数，通常使用**Kaiming Initialization**。
+
+## 合适的学习率
+
+### Learning Rate Decay
+
+- Step Learning Rate Decay: 根据循环的次数，逐渐减少学习率
+
+![steplearningratedecay](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/steplearningratedecay.png)
+
+- Cosine Learning Rate Decay: $lr_t = \frac{1}{2} lr_0(1 + \cos(\frac{\pi t}{T}))$
+
+![cosinelearningratedecay](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/cosinelearningratedecay.png)
+
+- Linear Learning Rate Decay: $lr_t = lr_0 (1 - \frac{t}{T})$
+
+![linearlearningratedecay](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/linearlearningratedecay.jpg)
+
+**使用SGD或者SGD + Momentum优化方法时，搭配learning rate decay，效果可能会更好；使用RMSProp或者Adam时，使用静态的学习率就行了**。
+
+## 正则化
+
+### Prevoius Methods
+
+L1 regularization, L2 regularization...
+
+### Dropout
+
+Dropout的核心思想是：在训练的过程中随机丢弃一些神经元，使网络不会过度依赖于某些特定的神经元，提高模型的泛化能力。
+
+在训练阶段，随机地将某些神经元设为0，将某个神经元设为 0的概率是超参数，通常为0.5。在测试阶段不会进行dropout操作，所有神经元都参与计算，并且乘上概率p。
+
+````python
+p = 0.5
+
+def train():
+  hidden_layer = X @ W1 + b1
+  hidden_layer[hidden_layer < 0] = 0 # ReLU
+  binary = (torch.rand(*hidden_layer) < p).to(hidden_layer.dtype)
+  hidden_layer *= binary # drop!
+  scores = hidden_layer @ W2 + b2
+  
+  loss = ...
+  gradients = ...
+  
+def predict():
+  hidden_layer = X @ W1 + b1
+  hidden_layer[hidden_layer < 0] = 0 # ReLU
+  hidden_layer *= p
+  scores = hidden_layer @ W2 + b2
+
+  y_pred = ...
+````
 
 ## Convolutional Layer
 
@@ -52,19 +131,19 @@
 
 > - 第一个卷积层的通道数是输入数据的通道数，在彩色图像数据中，就是3
 >
-> - **后面卷积层的通道数是上一个卷一层的卷积核的个数**
+> - **后面卷积层的通道数是上一个卷积层的卷积核的个数**
 
 ![multiconvolayers](Images/multiconvolayers.png)
 
-## Several Issues
+### Several Issues
 
-### Problem 1: Shrinking Size of Hidden Layers
+#### Problem 1: Shrinking Size of Hidden Layers
 
 假设某一层输入的宽度和高度为W，卷积核的宽度和高度为K，那么该层输出的宽度和高度就为W-K+1。也就是说每经过一次卷积层，隐藏层的宽度和高度会越来越小，这样就会限制住卷积的次数。
 
-> [见上图](#多个卷积层): $N \times 3 \times 32 \times 32 \rightarrow N \times 6 \times 28 \times 28 \rightarrow N \times 26 \times 26$ , 每一层的宽度和高度越来越小。
+> [见上图](#多个卷积层): $N \times 3 \times 32 \times 32 \rightarrow N \times 6 \times 28 \times 28 \rightarrow N \times 10 \times 26 \times 26$ , 每一层的宽度和高度越来越小。
 
-### Solution 1: Padding
+#### Solution 1: Padding
 
 在每一层的输入数据周围添加0，能够避免隐藏层的大小越来越小。假设某一层输入的宽度和高度为W，卷积核的宽度和高度为K，Padding的圈数为P，那么输出的宽度和高度就为W-K+1+2P。为了保持输出的宽度和高度不变，一个常见的做法是将P设置为 $\frac{K-1}{2}$ 。
 
@@ -75,7 +154,7 @@
 
 ![padding](Images/padding.png)
 
-### Problem 2: Receptive Field
+#### Problem 2: Receptive Field
 
 **感受野** (Receptive Field) 指的是**激活图中某一特定的单元能够“看到”的区域**，也就是在上一层中有哪些元素影响了它。感受野决定了激活图中每个单元能够提取到的信息量，较大的感受野能够捕捉到更广泛的特征，关注到整体上的信息。
 
@@ -83,7 +162,7 @@
 
 通常提高感受野的方式为使用更多卷积层，这样就能够提高激活图中每一个单元的感受野。但是问题在于对于很大的图像，我们需要很多个卷积层才能捕捉更整体上的信息，会增加很大的计算开销。
 
-### Solution 2: Strided Convolution
+#### Solution 2: Strided Convolution
 
 改变卷积核每次滑动的步长，将标准卷积 (stride=1) 中的步长提高。总的来说，如果输入的宽度和高度为W，卷积核的宽度和高度为K，Padding的圈数为P，Stride步长为S，那么输出的宽度和高度为 $\frac{W - K + 2P}{S} + 1$ 。
 
@@ -94,39 +173,7 @@
 
 ![stride](Images/stride.gif)
 
-## Pooling Layer
-
-池化 (Pooling) 是另一种减少采样 (Downsample) ，节约计算开销的方式。它可以缩小输入层/隐藏层的大小，但会失去一些精度。
-
-![poolinglayer](Images/poolinglayer.png)
-
-常见的Pooling方式是Max Pooling，它会将输入样本的宽度和高度划分为小区间，然后选取出每个区间内最大的值，组成一个新的样本。下图中的Max Pooling是pooling kernel的宽度和高度都为2，步长为2。
-
-![maxpooling](Images/maxpooling.png)
-
-## Pipeline of LeNet-5
-
-LeNet-5是一个经典的卷积神经网络架构，由Yann LeCun等人于1998年提出，通常用于手写识别等图像分类问题上。LeNet-5是深度学习领域的一个里程碑，展示了卷积神经网络在实际问题中的有效性。
-
-LeNet-5的流程如下：
-
-- 输入灰色图片，形状为1\*28\*28
-- 经过一次卷积层，有20个卷积核，大小都为1\*5\*5，得到大小为20\*28\*28的隐藏层；经过ReLU激活函数后的隐藏层大小不变
-- 经过一次池化层，隐藏层规模缩小到20\*14\*14
-- 再次重复一遍以上过程，不过具体的参数有所改变
-- 将得到的隐藏层平展
-- 经过一次全连接层 (Linear + ReLU + Linear) ，得到最终的10个分类分数。
-
-![lenet-5](Images/lenet-5.png)
-
-随着神经网络的进行，我们可以发现两个特征：
-
-- Spatial size decreases (using pooling or strided convolution)
-- Number of channels increases (total volume is preserved)
-
-以后会解释为什么是这样的。
-
-## Normalization
+## Normalization Layer
 
 对某一层的输出进行归一化 (Normalization) ，让它们的均值为0并且得到统一的方差，公式为: $\hat{x}^{(k)} = \frac{x^{(k)} - E(x^{(k)})}{\sqrt{Var(x^{(k)})}}$
 
@@ -150,7 +197,7 @@ LeNet-5的流程如下：
 
 ![contrast2d4d](Images/contrast2d4d.png)
 
-批量归一化通常放在全连接层/卷积层之后，激活函数之前：
+**批量归一化通常放在全连接层/卷积层之后，激活函数之前**：
 
 ![wherebn](Images/wherebn.png)
 
@@ -163,3 +210,44 @@ LeNet-5的流程如下：
 ### Other normalization
 
 Layer Normalization, Instance Normalization, Group Normalization...
+
+## Activation Layer
+
+目前已经了解到激活函数有：
+
+![activation](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/activation.png)
+
+Sigmoid和tanh都不是很好的选择，因为在函数的两端曲线都非常平，梯度很小，导致在反向传播时很有可能出现**梯度消失**的问题。
+
+ReLU也存在一个问题。如果被激活的矩阵中所有参数都小于0，那么激活之后所有参数都为0，那么进行反向传播时所有梯度都为0，这会导致无法进行更新，造成"**死亡ReLU问题**"  (Dead ReLU Problem) 。但是只要还有一个参数不为0，那么就能继续更新，还有可能将已经死亡的神经元重新激活。
+
+Leaky ReLU就是为了防止出现Dead ReLU Problem而出现的，它不会出现所有神经元都为0的情况。
+
+一般来说使用ReLU就可以了，如果需要进一步提升0.1%的效果 (其实效果没多大差别)，可以考虑Leaky ReLU / ELU / SELU / GELU等等。反正不要使用sigmoid或者tanh。
+
+## Pooling Layer
+
+池化 (Pooling) 是另一种减少采样 (Downsample) ，节约计算开销的方式。它可以缩小输入层/隐藏层的大小，但会失去一些精度。
+
+![poolinglayer](Images/poolinglayer.png)
+
+常见的Pooling方式是Max Pooling，它会将输入样本的宽度和高度划分为小区间，然后选取出每个区间内最大的值，组成一个新的样本。下图中的Max Pooling是pooling kernel的宽度和高度都为2，步长为2。
+
+![maxpooling](Images/maxpooling.png)
+
+## Transfer Learning
+
+迁移学习的核心思想是避免从头开始训练一个模型，而是对一个已经预训练好了的模型进行特定的优化，使其适应新的任务。这样做的好处是：
+
+- 减少计算成本，不用从头开始训练大模型
+- 降低数据需求，新的任务可能没有大量数据，但是这也没关系，因为预训练的模型已经学习到了一般的特征
+- 加开训练速度，直接在已有的模型基础上进行调整
+
+### 迁移学习的流程
+
+- 选择一个预训练模型 (最好是已经在大型数据集上训练过的模型) ，比如在ImageNet上训练好的ResNet，或者在大型语料库上训练好的BERT等等
+- **冻结前面的卷积层用它们来提取输入的特征 (Feature Extraction) ，仅仅训练后面的全连接层 (Fine-tuning)**
+
+> 在深度学习中，前几层通常学习到的是低级特征，比如颜色、纹理等等；中间层学习到的是模式和形状，比如轮廓等等；后面几层学习到的是高级特征，更加整体的信息. **如果新任务和原任务相似的话，那么低级特征和中级特征是通用的，只需要训练高级特征就行了**。
+
+![transferlearning](Images/transferlearning.png)

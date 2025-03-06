@@ -1,5 +1,25 @@
 # Classical CNN Architectures
 
+## LeNet-5
+
+LeNet-5是一个经典的卷积神经网络架构，由Yann LeCun等人于1998年提出，通常用于手写识别等图像分类问题上。LeNet-5是深度学习领域的一个里程碑，展示了卷积神经网络在实际问题中的有效性。
+
+LeNet-5的流程如下：
+
+- 输入灰色图片，形状为1\*28\*28
+- 经过一次卷积层，有20个卷积核，大小都为1\*5\*5，得到大小为20\*28\*28的隐藏层；经过ReLU激活函数后的隐藏层大小不变
+- 经过一次池化层，隐藏层规模缩小到20\*14\*14
+- 再次重复一遍以上过程，不过具体的参数有所改变
+- 将得到的隐藏层平展
+- 经过一次全连接层 (Linear + ReLU + Linear) ，得到最终的10个分类分数。
+
+![lenet-5](Images/lenet-5.png)
+
+随着神经网络的进行，我们可以发现两个特征：
+
+- Spatial size decreases (using pooling or strided convolution)
+- Number of channels increases (total volume is preserved)
+
 ## AlexNet
 
 AlexNet是一种深度卷积神经网络，由AI教父，2024诺贝尔物理学奖得主Geoffrey Hinton与其学生Alex Krizhevsky, Ilya Sutskever (前openAI首席科学家) 于2012年提出，并在那一年的ImageNet上取得了革命性的突破。说AlexNet是这一轮深度学习与AI浪潮的奠基之作也毫不为过。
