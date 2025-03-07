@@ -85,8 +85,8 @@ LSTM的解决方法是通过记忆单元 (Memory Cell) 和门控制 (Gate) 允�
 
 假设有输入数据 $[x_1, x_2, x_3]$ ，那么计算过程为：
 
-1. 将 $x_1$ 向量和 $h_0$ 向量按照相同的维度拼接起来，一般将 $h$ 放在前面, $x$ 放在后面，表示为 $\begin{pmatrix} h_{0} \\ x_1 \end{pmatrix}$
-2. $\begin{pmatrix} h_{0} \\ x_1 \end{pmatrix}$和权重矩阵W相乘后的结果分别进入不同的激活函数 (门控机制)
+1. 将 $x_1$ 向量和 $h_0$ 向量按照相同的维度拼接起来，一般将 $h$ 放在前面, $x$ 放在后面，表示为 $\begin{pmatrix} h_{0} & x_1 \end{pmatrix}^T$
+2. $\begin{pmatrix} h_{0} & x_1 \end{pmatrix}^T$和权重矩阵W相乘后的结果分别进入不同的激活函数 (门控机制)
    - 遗忘门 $f$ 用 $sigmoid$ 计算，控制过去信息的保留
    - 输入门 $i$ ，用 $sigmoid$ 计算，控制新信息的流入
    - 输出门 $o$ ，用 $sigmoid$ 计算，控制最终输出多少信息
