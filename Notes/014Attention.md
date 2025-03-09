@@ -54,3 +54,14 @@ $s_1 = f_{RNN}(y_0, c_1)$
 
 ![seq2seqattention](Images/seq2seqattention.gif)
 
+## Example: Image Captioning
+
+一张图片经过多个卷积层后仍是一个三维张量，可以将这个三维张量中每一个高宽位置上的向量看作编码器的隐藏向量 $h$ 。
+
+1. 解码器的初始隐藏向量 $s_0$ 分别与 $h$ 进行 前馈神经网络传播得到 $e$ ，然后 $e$ 再进行归一化为 $a$ , $a$ 再与 $h$ 相乘然后求和得到第一个上下文向量 $c_1$ 。
+
+2. $c_1$ 与 $y_0$ \<start\> 进行 Vanilla RNN 传播得到 $s_1$ 并输出 $y_1$ 。
+
+3. $s_1$ 重复 $s_0$ 的步骤，如此重复，直到输出 \<stop\> 。
+
+![imagecaptioningwithattention](Images/imagecaptioningwithattention.gif)
