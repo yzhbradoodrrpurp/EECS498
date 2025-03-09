@@ -100,7 +100,7 @@ Self-Attention Layer 和普通的 Attention Layer 的区别在于：
 - $Q$ 的来源不一样。普通 Attention Layer 中的 $Q$ 来自于 Decoder 中的隐藏状态 $S$ ，Self-Attention Layer 中的 $Q$ 来自于输入 $X$ 和 $W_Q$ 的乘积。
 - 由于 $Q$ 的来源不同，所以 Attention Layer 能够关注到输入的时序关系，而 **Self-Attention Layer 不能关注到输入的时序关系**。
 
-由于 Self-Attention Layer 不能关注到输入的时序关系，所以常常会给输入 $X$ 进行位置编码 (Positional Encoding) 。
+普通的 Attention Layer 还是基于 seq2seq 架构的，但是 Self-Attention Layer 完全是另一种架构了，它是 Tranformer 的核心。由于 Self-Attention Layer 不能关注到输入的时序关系，所以常常会给输入 $X$ 进行**位置编码** (Positional Encoding) 。
 
 ![positionalencoding](Images/positionalencoding.png)
 
@@ -120,6 +120,6 @@ Transformer Block：
 
 4. $x_1'''', x_2'''', x_3'''', x_4''''$ 相加然后再和 $[x_1''', x_2''', x_3''', x_4''']$ 相加 (广播机制) 然后再进行一次层归一化，得到输出 $[y_1, y_2, y_3, y_4]$
 
-一个 Tranformer 模型由多个 Transformer Block 组成，与传统的 Vanilla RNN, LSTM 不同，Tranformer 不需要按照顺序处理序列中的每个元素，它可以直接并行计算，大大提高了训练效率。由于没有传统 RNN 中的递归结构，Transformer 可以灵活地处理不同长度的序列，并且不会收到序列长度的限制。
+一个 Tranformer 模型由多个 Transformer Block 组成，与传统的 Vanilla RNN, LSTM 不同，Tranformer 不需要按照顺序处理序列中的每个元素，它可以直接并行计算，大大提高了训练效率。由于没有传统 RNN 中的递归结构，Transformer 可以灵活地处理不同长度的序列，并且不会受到序列长度的限制。
 
 ![transformer](Images/transformer.gif)
