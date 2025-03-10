@@ -21,7 +21,7 @@ $\hat{y} = \vec{X} \cdot \vec{W} + \vec{b}$ 得到的是一个大小为 $m * c$ 
 
 对于一组数据集中的第i个数据 $(x_i, y_i)$ , $x_i$ , $y_i$ 分别是特征和标签，大小分别为 $1 * n, 1 * c$ 。可以根据线性分类器模型函数得到该数据的预测分类 $\hat{y_i}$ ，大小和 $y_i$ 相同，都为 $1 * c$ 。记 $\hat{y_i}$ 中各个类别的分数为 $s_j$ , $\hat{y_i}$ 中正确类别的分数为 $s_{y_i}$ 。
 
-则**Multi-Class SVM Loss**可以表示为: $loss = \sum_{j \neq y_i}{max(0, s_j - s_{y_i} + \Delta)}$ 。$\Delta$ 被称作**超间隔参数**，通常被设置为1，但可以调整，**这表示当正确分类的得分比任何其它分类的得分高 $\Delta$ 数值时，损失为0**。
+则**Multi-Class SVM Loss**可以表示为: $loss = \sum_{j \neq y_i}{max(0, s_j - s_{y_i} + \Delta)}$ . $\Delta$ 被称作**超间隔参数**，通常被设置为1，但可以调整，**这表示当正确分类的得分比任何其它分类的得分高 $\Delta$ 数值时，损失为0**。
 
 在整个数据集上的损失就是 $\frac{1}{m}\sum_{i=1}^{m}{loss_i}$ 。
 
@@ -29,7 +29,7 @@ $\hat{y} = \vec{X} \cdot \vec{W} + \vec{b}$ 得到的是一个大小为 $m * c$ 
 
 ### Cross-Entropy Loss
 
-对于一组数据集中的第i个数据 $(x_i, y_i)$ ，$x_i, y_i$ 分别是特征和标签，大小分别为 $1 * n, 1 * c$ 。可以根据线性分类器模型函数得到该数据的预测分类 $\hat{y_i}$ ，大小和 $y_i$ 相同，都为 $1 * c$ 。
+对于一组数据集中的第i个数据 $(x_i, y_i)$ , $x_i, y_i$ 分别是特征和标签，大小分别为 $1 * n, 1 * c$ 。可以根据线性分类器模型函数得到该数据的预测分类 $\hat{y_i}$ ，大小和 $y_i$ 相同，都为 $1 * c$ 。
 
 对 $\hat{y_i}$ 中每个类别的分数进行**Softmax归一化**, $z_j = \frac{\exp^{\hat{y_{ij}}}}{\sum{\exp^{\hat{y_i}}}}$ , $z_j$ 可以看作 $x_i$ 被划分入j类别的概率。**损失函数可以表示为: $loss = -\log{z_{y_i}}$ , $z_{y_i}$ 为正确类别的softmax概率**。
 
@@ -39,6 +39,6 @@ $\hat{y} = \vec{X} \cdot \vec{W} + \vec{b}$ 得到的是一个大小为 $m * c$ 
 
 ## 正则化 (Regularization) 
 
-在成本函数中加入正则项，对模型的参数进行一些限制，可以**避免出现过拟合**或者**对参数的分布表达一些倾向**。$\lambda$ 是一个超参数，表明正则化在整个成本函数中的权重 (The tradeoff between minimizing cost function and avoiding overfitting)。
+在成本函数中加入正则项，对模型的参数进行一些限制，可以**避免出现过拟合**或者**对参数的分布表达一些倾向. $\lambda$ 是一个超参数，表明正则化在整个成本函数中的权重 (The tradeoff between minimizing cost function and avoiding overfitting)。
 
 ![regularization](Images/regularization.png)
