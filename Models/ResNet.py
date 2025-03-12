@@ -6,6 +6,7 @@
 
 import torch
 
+
 # NOTE: 没有 shortcut 的普通传播块
 class PlainBlock(torch.nn.Module):
     def __init__(self, in_channels=3, out_channels=8):
@@ -24,6 +25,7 @@ class PlainBlock(torch.nn.Module):
         scores = self.model(X)
         return scores
 
+
 # NOTE: 加上 shortcut 后的 Residual 传播块
 class ResidualBlock(torch.nn.Module):
     def __init__(self, in_channels=3, out_channels=8):
@@ -41,9 +43,12 @@ class ResidualBlock(torch.nn.Module):
         scores = self.block(X) + self.shortcut(X)
         return scores
 
+
 # NOTE: 全连接层
 class FullyConnectedLayer(torch.nn.Module):
     def __init__(self, num_dimensions, hidden_size, num_classes):
+        super().__init__()
+
         self.model = torch.nn.Sequential(
             torch.nn.Linear(num_dimensions, hidden_size),
             torch.nn.BatchNorm1d(hidden_size),
@@ -55,21 +60,23 @@ class FullyConnectedLayer(torch.nn.Module):
         scores = self.model(X)
         return scores
 
+
 # NOTE: 由多个 Residual Blocks, 一个 Average Pooling layer, 一个 Flatten Layer 和全连接层组成的 ResNet
 class ResNet(torch.nn.Module):
-    def __init__(self, in_channels=3, out_channels=64, num_blocks=4):
+    def __init__(self, channels=(3, 8, 16, 32, 64, 128, 256), num_classes=10):
         super().__init__()
 
+        # stack up the residual blocks
         residual_blocks = []
+        num_blocks = len(channels)
 
-        for block in range(num_blocks):
-            if block == 0:
-                residual_blocks.append(ResidualBlock(in_channels, out_channels))
-            else:
-                residual_blocks.append(ResidualBlock(out_channels, out_channels))
+        for block in range(num_blocks - 1):
+            residual_blocks.append(ResidualBlock(channels[block], channels[block + 1]))
 
         self.residual_blocks = torch.nn.Sequential(*residual_blocks)
-        self.fully_connected = FullyConnectedLayer(out_channels, 100, 10)
+
+        # add fully-connected layers to the end
+        self.fully_connected = FullyConnectedLayer(channels[-1], 100, 10)
 
     def forward(self, X):
         N, C, H, W = X.shape
@@ -85,3 +92,21 @@ class ResNet(torch.nn.Module):
         return scores
 
 
+if __name__ == '__main__':
+    # generate random data for testing
+    X = torch.randint(0, 256, (64, 3, 32, 32), dtype=torch.float)
+    y = torch.randint(0, 10, (64,))
+
+    model = ResNet(channels=[3, 8, 16, 32, 64, 128, 256], num_classes=10)
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+    epochs = range(10)
+
+    for epoch in epochs:
+        scores = model(X)
+        loss = torch.nn.functional.cross_entropy(scores, y)
+
+        print(f"Epoch: {epoch}, Loss: {loss:.4f}")
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
