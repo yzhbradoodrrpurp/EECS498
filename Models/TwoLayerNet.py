@@ -60,10 +60,10 @@ class TwoLayerNet:
 
         # compute the loss
 
-        hidden_layer = X @ self.W1 + self.b1.view(-1, 1)  # (N, H)
-        hidden_layer[hidden_layer < 0] = 0  # ReLU
+        feature_map = X @ self.W1 + self.b1.view(-1, 1)  # (N, H)
+        feature_map[feature_map < 0] = 0  # ReLU
 
-        scores = hidden_layer @ self.W2 + self.b2.view(-1, 1)  # (N, C)
+        scores = feature_map @ self.W2 + self.b2.view(-1, 1)  # (N, C)
         socres -= scores.max(dim=1).values.view(-1, 1)  # avoid overflow
 
         softmax_scores = scores.exp() / scores.exp().sum(dim=1).view(-1, 1)
@@ -77,7 +77,7 @@ class TwoLayerNet:
         softmax_scores[range(N), y] -= 1
         dscores = softmax_scores / N
 
-        dW2 = hidden_layer.T @ dscores + reg * 2 * self.W2
+        dW2 = feature_map.T @ dscores + reg * 2 * self.W2
         db2 = dscores.sum(dim=0)
 
         dhiddenlayer = dscores @ self.W2.T
@@ -104,9 +104,9 @@ class TwoLayerNet:
         return X[indices, :], y[indices]
 
     def predict(self, X):
-        hidden_layer = X @ self.W1 + self.b1.view(-1, 1)  # (N, H)
-        hidden_layer[hidden_layer < 0] = 0  # ReLU
-        scores = hidden_layer @ self.W2 + self.b2.view(-1, 1)  # (N, C)
+        feature_map = X @ self.W1 + self.b1.view(-1, 1)  # (N, H)
+        feature_map[feature_map < 0] = 0  # ReLU
+        scores = feature_map @ self.W2 + self.b2.view(-1, 1)  # (N, C)
 
         return scores.argmax(dim=1)
 

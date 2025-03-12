@@ -100,14 +100,14 @@ class DeepConvNet:
         return y_pred
 
     def forward(self, X, mode='train'):
-        hidden_layer = X.clone()
+        feature_map = X.clone()
 
         for layer in self.sequence:
             if isinstance(layer, BatchNorm):
                 layer.mode = mode
-            hidden_layer = layer.forward(hidden_layer)
+            feature_map = layer.forward(feature_map)
 
-        scores = hidden_layer.clone()
+        scores = feature_map.clone()
 
         return scores
 

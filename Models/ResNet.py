@@ -81,13 +81,13 @@ class ResNet(torch.nn.Module):
     def forward(self, X):
         N, C, H, W = X.shape
         # residual blocks forward pass
-        hidden_layer = self.residual_blocks(X)
+        feature_map = self.residual_blocks(X)
         # pooling layer to scale H and W to 1
-        hidden_layer = torch.nn.AvgPool2d(kernel_size=(H, W))(hidden_layer)
+        feature_map = torch.nn.AvgPool2d(kernel_size=(H, W))(feature_map)
         # flat
-        hidden_layer = torch.nn.Flatten()(hidden_layer)
+        feature_map = torch.nn.Flatten()(feature_map)
         # fully-connected layer
-        scores = self.fully_connected(hidden_layer)
+        scores = self.fully_connected(feature_map)
 
         return scores
 
