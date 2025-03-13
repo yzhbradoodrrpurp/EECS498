@@ -14,3 +14,4 @@
 - 2025.3.2: 完成了 [Fully-Connected Neural Networks](Assignments/A3/fully_connected_networks.ipynb)
 - 2025.3.7: 完成了 [Convolutional Neural Networks](Assignments/A3/convolutional_networks.ipynb) 
 - 2025.3.9: 完成了 [PyTorch AutoGrad and NN Modules](Assignments/A4/pytorch_autograd_and_nn.ipynb)
+- 2025.3.13: 完成了 [RNN, LSTM, Attention Models and Image Captioning](Assignments/A4/rnn_lstm_attention_captioning.ipynb) 
