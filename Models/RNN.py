@@ -13,12 +13,12 @@ class RNN(torch.nn.Module):
         self.max_length = max_length
 
         # for hidden state part
-        self.Wx = torch.nn.Parameter(torch.randn(input_dimensions, hidden_dimensions, dtype=dtype, device=device))
-        self.Wh = torch.nn.Parameter(torch.randn(hidden_dimensions, hidden_dimensions, dtype=dtype, device=device))
+        self.Wx = torch.nn.Parameter(torch.empty(input_dimensions, hidden_dimensions, dtype=dtype, device=device))
+        self.Wh = torch.nn.Parameter(torch.empty(hidden_dimensions, hidden_dimensions, dtype=dtype, device=device))
         self.b = torch.nn.Parameter(torch.zeros(hidden_dimensions, dtype=dtype, device=device))
 
-        torch.nn.init.kaiming_normal_(self.Wx)
-        torch.nn.init.kaiming_normal_(self.Wh)
+        torch.nn.init.kaiming_normal_(self.Wx, nonlinearity='tanh')
+        torch.nn.init.kaiming_normal_(self.Wh, nonlinearity='tanh')
         torch.nn.init.zeros_(self.b)
 
         # convert hidden state into output
@@ -46,11 +46,11 @@ class RNN(torch.nn.Module):
             h_next = X[:, t, :] @ self.Wx + h_next @ self.Wh + self.b
             h_next = h_next.tanh()
 
-            out = self.fc(h_next)
+            out = self.fc(h_next)  # (N, output_dim)
             outputs.append(out)
 
         # convert Python list to PyTorch tensor
-        outputs = torch.stack(outputs)
+        outputs = torch.stack(outputs, dim=1)  # (N, T, output_dim)
 
         return outputs
 
@@ -64,21 +64,19 @@ class RNN(torch.nn.Module):
         D = self.Wx.shape[0]
 
         start_token = torch.ones(N, D, dtype=h0.dtype, device=h0.device)
+        next_token = start_token
+        h_next = h0
 
         tokens = []
 
         for i in range(self.max_length):
-            if i == 0:
-                h_next = start_token @ self.Wx + h0 @ self.Wh + self.b
-            else:
-                h_next = next_token @ self.Wx + h_next @ self.Wh + self.b
-
+            h_next = next_token @ self.Wx + h_next @ self.Wh + self.b
             h_next = h_next.tanh()
 
-            next_token = self.fc(h_next)
+            next_token = self.fc(h_next)  # (N, out_dim)
             tokens.append(next_token)
 
         # convert Python list to PyTorch tensor
-        tokens = torch.stack(tokens)
+        tokens = torch.stack(tokens, dim=1)  # (N, max_length, out_dim)
 
         return tokens
