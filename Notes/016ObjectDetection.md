@@ -57,7 +57,7 @@
 
 ## Fast R-CNN
 
-在之前提到的 [R-CNN](#Detecting-Multiple-Objects-(R-CNN)) 架构中，2000多个 RoI 会经过大型卷积神经网络，这使得运行速度很慢。Fast R-CNN 进行如下调整，使得运算速度大大加快：
+在之前提到的 [R-CNN](#Detecting-Multiple-Objects-R-CNN) 架构中，2000多个 RoI 会经过大型卷积神经网络，这使得运行速度很慢。Fast R-CNN 进行如下调整，使得运算速度大大加快：
 
 - 先将整个图片经过大型卷积神经网络，只经过其中的卷积层，不经过平展和全连接层
 - 对得到的特征图使用 Region Proposals 得到 RoI，然后全部转换为统一的大小，传入更轻量级的 CNN 中得到物体的类别和位置，最终使用 Non-Max Supression 去掉重复的结果
