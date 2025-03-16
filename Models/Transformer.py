@@ -81,10 +81,11 @@ class TransformerBlock(torch.nn.Module):
         # `torch.nn.Identity` 不改变输入
         self.residual_shortcut1 = torch.nn.Identity()
         # Transformer 中使用 Layer Normalization
-        self.batch_norm = torch.nn.LayerNorm(input_dim)
+        self.layer_norm1 = torch.nn.LayerNorm(input_dim)
         # MLP 层分别处理每一个输入数据
         self.fully_connected = MLP(input_dim, input_dim, input_dim)
         self.residual_shortcut2 = torch.nn.Identity()
+        self.layer_norm2 = torch.nn.LayerNorm(input_dim)
 
     def forward(self, X):
         """
@@ -95,8 +96,9 @@ class TransformerBlock(torch.nn.Module):
         N, T, D = X.shape
 
         feature_map = self.self_attention(X) + self.residual_shortcut1(X)  # (N, T, D)
-        feature_map = self.batch_norm(feature_map)  # (N, T, D)
-        Y = self.fully_connected(feature_map) + self.residual_shortcut2(feature_map)  # (N, T, D)
+        feature_map = self.layer_norm1(feature_map)  # (N, T, D)
+        feature_map = self.fully_connected(feature_map) + self.residual_shortcut2(feature_map)  # (N, T, D)
+        Y = self.layer_norm2(feature_map)
 
         return Y
 

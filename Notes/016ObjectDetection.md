@@ -20,11 +20,13 @@
 对于多物体的检测，通常的训练流程如下：
 
 - 使用 Region Proposals 方法，在图片中确定可能包含所有需要检测物体的小区域 (Regions of Interest, RoI)
-- 将各个小区域中的图片大小全部转换为统一的大小 (比如 224*224) ，统一接口方便传入 CNN 
+- 将各个小区域中的图片大小全部转换为统一的大小 (比如 224*224，被称为 RoI Pool) ，统一接口方便传入 CNN 
 - 然后分别对这些小区域使用[单个物体检测的方法](#Detecting-a-Single-Object)，得到物体的类别的区域
 
 - 最后对得到的物体区域 (x, y, height, width) 进行转换，得到最终的物体区域
 
+> RoI Pool 将不同大小的 RoI 统一映射到固定大小，然而它会导致不对齐的问题。因为在使用 Pooling 操作时，网格的边界会四舍五入到整数索引，导致有一部分边界损失掉了。想要避免出现 Misalignment，可以使用 Bilinear Interpolation 方法。
+>
 > 由 Region Proposals 得到的小区域太''硬''了，所以我们在最后一步加上了可学习参数对这些位置进行一些调整。
 
 ![rcnn](Images/rcnn.gif)
@@ -53,7 +55,7 @@
 
 #### Evaluating Object Detection: Mean Average Precision
 
-没懂这一块...
+mAP 用于衡量一个模型在 Object Detection 任务上的表现能力。具体推导没懂...
 
 ## Fast R-CNN
 
@@ -77,3 +79,6 @@ Faster R-CNN 的结构大部分和 Fast R-CNN 相似，唯一的不同之处在�
 - 最终再次进行一次 Non-Max Suppression 去掉重复的结果
 
 ![rpn](Images/rpn.png)
+
+Faster R-CNN 是一种 Two-Staged Model，在第一个阶段，它从图像中生成候选区域；在第二个阶段，它对目标进行检测。
+
