@@ -36,7 +36,9 @@ class SelfAttention(torch.nn.Module):
         key = self.key_linear(X)  # (N, T, Q)
         value = self.value_linear(X)  # (N, T, V)
 
-        alignment_scores = query @ key.transpose(1, 2) / math.sqrt(D)  # (N, T, T)
+        Q = query.shape[-1]
+
+        alignment_scores = query @ key.transpose(1, 2) / math.sqrt(Q)  # (N, T, T)
         attention_weights = torch.nn.functional.softmax(alignment_scores, dim=2)  # (N, T, T)
 
         scores = attention_weights @ value  # (N, T, V)
