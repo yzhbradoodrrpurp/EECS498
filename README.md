@@ -19,3 +19,5 @@
 - 2025.3.14: 完成了 [Network Visualization and Adversarial Examples](Assignments/A4/network_visualization.ipynb) 
 
 - 2025.3.15: 完成了 [Style Transfer](Assignments/A4/style_transfer.ipynb) 
+
+- 2025.3.20: 完成了 [Single-Staged Object Detector](Assignments/A5/single_stage_detector_yolo.ipynb) 
