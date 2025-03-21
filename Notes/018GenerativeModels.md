@@ -36,7 +36,7 @@ Autoencoder 使用一个 Encoder 和 Decoder 分别将输入 $x$ 转换为低维
 
 > Encoder, Decoder 都是深度神经网络，Encoder 用于降低输入 $x$ 的尺寸 (维度) 得到 $z$，Decoder 用于将低维度的潜在表示 $z$ 复原为 $x$ 的维度。经过 Autoencoder 得到的 $\hat x$ 和原来的 $x$ 相比会更加模糊。
 
-![autoencoder](/Users/yzhbradoodrrpurp/Desktop/EECS498/Notes/Images/autoencoder.png)
+![autoencoder](Images/autoencoder.png)
 
 在训练结束后，Autoencoder 会丢掉 Decoder，因为训练的目标是学习输入 $x$ 的编码过程 (即调整 Encoder)，关注如何有效地压缩输入数据，而不一定是要将压缩后的数据恢复。
 
