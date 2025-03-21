@@ -34,6 +34,7 @@
 ### A5
 
 - [Single-Staged Object Detector](Assignments/A5/single_stage_detector_yolo.ipynb): This assignment will walk you through a R-CNN and a fast R-CNN to do Object Detection task on PASCAL VOC 2007 dataset.
+- [Two-Staged Object Detector](Assignments/A5/two_stage_detector_faster_rcnn.ipynb): This assignment introduces a new way to define RoI which is through a region proposal network.
 
 ## Schedule
 
@@ -67,3 +68,4 @@
 
 - 2025.3.20: Finish [Single-Staged Object Detector](Assignments/A5/single_stage_detector_yolo.ipynb) 
 
+- 2025.3.21: Finish [Two-Staged Object Detector](Assignments/A5/two_stage_detector_faster_rcnn.ipynb) 
