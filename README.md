@@ -58,7 +58,7 @@
 ### A4
 
 - 2025.3.9: Finish [PyTorch AutoGrad and NN Modules](Assignments/A4/pytorch_autograd_and_nn.ipynb)
-- 2025.3.13: Finish [RNN, LSTM, Attention Models and Image Captioning](Assignments/A4/rnn_lstm_attention_captioning.ipynb) 
+- 2025.3.13: Finish [RNN, LSTM, Attention and Image Captioning](Assignments/A4/rnn_lstm_attention_captioning.ipynb) 
 
 - 2025.3.14: Finish [Network Visualization and Adversarial Examples](Assignments/A4/network_visualization.ipynb) 
 

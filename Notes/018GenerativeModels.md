@@ -8,7 +8,7 @@
 
 ## Discriminative vs Generative Models
 
-Discriminative Model 是在有限的标签 $y$ 中寻找最符合输入 $x$ 的过程。它的问题在于不能处理不合理的输入，所有标签的概率和为 1，总会有概率最大的标签出现，即便这个标签是错的。比如在一个只有猫、狗两个标签的模型中输入一个猴子，这个模型输出的标签无论怎样都不是猴子，它的输出只能是猫或者狗。
+Discriminative Model 是在有限的标签 $y$ 中寻找最符合输入 $x$ 的过程。它的问题在于不能处理不合理的输入，所有标签的概率和为 1，这会在标签之间引入某种竞争导致总会有概率最大的标签出现，即便这个标签是错的。比如在一个只有猫、狗两个标签的模型中输入一个猴子，这个模型输出的标签无论怎样都不是猴子，它的输出只能是猫或者狗。
 
 Generative Model 的目标是学习关于输入 $x$ 本身的概率分布，而不受到标签 $y$ 的影响。它是在整个关于输入 $x$ 的分布中进行学习，也就是说，它可以拒绝不合理的输入。
 
@@ -26,7 +26,7 @@ Discriminative Model 可以看作是 $P(y|x)$，Generative Model 可以看作是
 
 Autoregressive Model 是一种能显示表达概率的并且能追踪概率的模型，它可以表示为 $P(x) = f(x, W)$ ，训练自回归模型就是训练 $W$， $W^* = argmax_W \sum_i logP(x^{(i)}) = argmax_W \sum_i logf(x^{(i)}, W)$，找到使输入数据概率最大的 $W^*$。
 
-$x$ 是多个输入的集合 $x = (x_1, x_2, ..., x_T)$，那么 $P(x) = P(x1, x_2, ..., x_T) = P(x_1)P(x_2|x_1)P(x_3|x_1x_2)...$。可以发现这种形式和之前学习到的 RNN 很相似，每一个 $x_t$ 都依赖于之前所有的 $x$。事实上，Autoregressive Model 就是一种基于序列的统计模型，它通过过去的值来预测当前或者未来的值，RNN, LSTM, Transformer 都是自回归模型不同的实现方式。
+$x$ 是多个输入的集合 $x = (x_1, x_2, ..., x_T)$，那么 $P(x) = P(x1, x_2, ..., x_T) = P(x_1)P(x_2|x_1)P(x_3|x_1x_2)...$。可以发现这种形式和之前学习到的 RNN 很相似，每一个 $x_t$ 都依赖于之前所有的 $x$。事实上, **Autoregressive Model 就是一种基于序列的统计模型，它通过过去的值来预测当前或者未来的值，RNN, LSTM, Transformer 都是自回归模型不同的实现方式**。
 
 ## Variational Autoencoder
 
@@ -57,8 +57,35 @@ VAE 的损失函数由两部分构成，Reconstruction Loss 和 KL Divergence Lo
 
 最终的损失函数: $loss_{VAE} = loss_{recon} + \beta loss_{KL}$, $\beta$ 用于调节两者之间的权重。
 
-关于 VAE 详细的数学推导可以参考[维基百科](https://en.wikipedia.org/wiki/Variational_autoencoder)。
+关于 VAE 详细的数学推导可以参考[维基百科](https://en.wikipedia.org/wiki/Variational_autoencoder)，它大致上是这样的: $P(x) = \int P(x|z)P(z) dz \geq E[logP(x|z) - D_{KL}(Q(z|x), P(z))]$。我们需要使 $P(x)$ 最大但是它的直接表示难以计算，所以我们找到了它的下界，通过使下界最大来使 $P(x)$ 最大。
 
 ## Generative Adversarial Networks
 
-Coming Soon...
+Generative Adversarial Network 由 Ian Goodfellow 等人于2014年提出，它由两个深度神经网络组成：
+
+- 生成器 Generator: 负责生成数据，试图欺骗判别器
+- 判别器 Discriminator: 负责判断输入数据是真实数据 (来自训练集) 还是生成数据 (来自生成器)
+
+这两个网络相互对抗形成博弈关系，生成器生成越来越逼真的数据，使得判别器无法区分真假；判别器不断提高自身能力，以正确区分真实数据和生成数据。最后 GAN 达到一个平衡状态，判别器无法明显区别真假数据，此时生成数据的质量足够高。
+
+真实数据的标签设置为1，生成数据的标签被设置为0，GAN 的目标分为 Generator 的目标和 Discriminator 的目标：
+
+- Discriminator:  使得 $D(x) \rightarrow 1$，即 Discriminator 将真实数据 $x$ 分类为1；使得 $D(G(z)) \rightarrow 0$，即 Discriminator 将生成数据 $G(z)$ 分类为0，z 是随机噪声
+- Generator: 使得 $D(G(z)) \rightarrow 1$，即努力让生成数据逼真，骗过判别器
+
+GAN 的损失函数表示为: $min_G \ max_D V(D, G) = E_{x ～ p_{data}}[log(D(x))] + E_{z ～ p_z}[log(1 - D(G(z)))]$。
+
+> Generator 生成的数据应该和真实数据的形状相同。
+
+![gan](Images/gan.png)
+
+在训练最开始时，Generator 表现通常会很糟糕，Discriminator 可以很轻易的辨别出真实数据和生成数据，所以 $D(G(z)) \rightarrow 0$。在这一阶段, $y = log(1 - D(G(z)))$ 的梯度非常小，容易产生梯度消失的问题，所以通常会变换一下训练方式: $y = -log(D(G(z)))$。
+
+![ganstarttraining](Images/ganstarttraining.png)
+
+在训练完成后，一般会丢掉 Discriminator (取决于具体的任务)，然后给定一个随机噪声，让它通过 Generator 得到生成后的结果。当 GAN 训练收敛到最优情况时，会出现以下两种特征：
+
+- $p_{data} = p_{G(z)}$，即生成数据的分布和真实数据的分布完全相同
+- $D(x) \rightarrow 0.5$，判别器难以判断一个真实数据的分类情况
+
+但是在实际情况中，可能由于神经网络架构的限制，GAN 无法达到理论上的最优状态。
