@@ -16,6 +16,8 @@ Conditional Generative Model 结合了 Discriminative Model 和 Generative Model
 
 Discriminative Model 可以看作是 $P(y|x)$，Generative Model 可以看作是 $P(x)$，Conditional Generative Model 可以看作是 $P(x|y)$，那么根据贝叶斯公式就可以得到 $P(x|y) = \frac{P(y|x)}{P(y)} P(x)$。也就是说，一个 Discriminative Model 可以通过某种转换得到 Conditional Generative Model。
 
+更通俗的来说，Discriminative Model 是判别模型，用于**判断数据之间的区别**；Generative Model 是生成模型，主要用于学习数据的分布并**生成新的类似的数据**。
+
 ![bayes](Images/bayes.png)
 
 这是一个关于 Generative Model 的分类，后面将会讲到 Autoregressive Model, Variational Autoencoder 和 Generative Adversarial Networks。
