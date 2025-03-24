@@ -36,9 +36,13 @@
 - [Single-Staged Object Detector](Assignments/A5/single_stage_detector_yolo.ipynb): This assignment will walk you through a R-CNN and a fast R-CNN to do Object Detection task on PASCAL VOC 2007 dataset.
 - [Two-Staged Object Detector](Assignments/A5/two_stage_detector_faster_rcnn.ipynb): This assignment introduces a new way to define RoI which is through a region proposal network.
 
+### A6
+
+- [Generative Adversarial Networks](Assignments/A6/generative_adversarial_networks.ipynb): The content of this assignment is about **Generative Adversarial Networks** or GANs for short. It will demonstrate how to stack up a **generator** and a **discriminator**. Aside from that, it will also talk about how to implement the generator loss and discriminator loss in two different approaches. Since GANs are extremely sensitive and finicky to hyperparameters, they are trained on MNIST dataset for the sake of simplicity.
+
 ## Schedule
 
-- 2025.2.7: Initialize the repository.
+2025.2.7: Initialize the repository.
 
 ### A1
 
@@ -67,5 +71,10 @@
 ### A5
 
 - 2025.3.20: Finish [Single-Staged Object Detector](Assignments/A5/single_stage_detector_yolo.ipynb) 
-
 - 2025.3.21: Finish [Two-Staged Object Detector](Assignments/A5/two_stage_detector_faster_rcnn.ipynb) 
+
+### A6
+
+- 2025.3.24: Finish [Generative Adversarial Networks](Assignments/A6/generative_adversarial_networks.ipynb) 
+
+2025.3.24: Finish all the assignments, congratulations.
