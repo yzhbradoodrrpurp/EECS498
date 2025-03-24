@@ -75,15 +75,16 @@ Generative Adversarial Network 由 Ian Goodfellow 等人于2014年提出，它�
 - Discriminator:  使得 $D(x) \rightarrow 1$，即 Discriminator 将真实数据 $x$ 分类为1；使得 $D(G(z)) \rightarrow 0$，即 Discriminator 将生成数据 $G(z)$ 分类为0，z 是随机噪声
 - Generator: 使得 $D(G(z)) \rightarrow 1$，即努力让生成数据逼真，骗过判别器
 
-GAN 的损失函数表示为: $min_G \ max_D V(D, G) = E_{x ～ p_{data}}[log(D(x))] + E_{z ～ p_z}[log(1 - D(G(z)))]$。
+GAN 的损失函数表示为: $min_G \ max_D V(D, G) = E_{x ～ p_{data}}[log(D(x))] + E_{z ～ p_z}[log(1 - D(G(z)))]$，又可以拆分为以下两个部分便于理解：
 
-> Generator 生成的数据应该和真实数据的形状相同。
+- $min_G E_{z ～ p_z}[log(1 - D(G(z)))] \rightarrow max_G \ E_{z ～ p_z}[logD(G(z))]$
+- $max_D E_{x ～ p_{data}}[log(D(x))] + E_{z ～ p_z}[log(1 - D(G(z)))]$
+
+> 1. Generator 生成的数据应该和真实数据的形状相同。
+>
+> 2. 从 $min_G E_{z ～ p_z}[log(1 - D(G(z)))]$ 转换为 $max_G \ E_{z ～ p_z}[logD(G(z))]$ 是为了防止一开始的梯度消失问题。在训练最开始的阶段，由于 generator 的辨别能力很差 $D(G(z))$ 接近于0，导致 $y = log(1 - D(G(z)))$ 的梯度非常小，训练难以进行。
 
 ![gan](Images/gan.png)
-
-在训练最开始时，Generator 表现通常会很糟糕，Discriminator 可以很轻易的辨别出真实数据和生成数据，所以 $D(G(z)) \rightarrow 0$。在这一阶段, $y = log(1 - D(G(z)))$ 的梯度非常小，容易产生梯度消失的问题，所以通常会变换一下训练方式: $y = -log(D(G(z)))$。
-
-![ganstarttraining](Images/ganstarttraining.png)
 
 在训练完成后，一般会丢掉 Discriminator (取决于具体的任务)，然后给定一个随机噪声，让它通过 Generator 得到生成后的结果。当 GAN 训练收敛到最优情况时，会出现以下两种特征：
 
@@ -91,3 +92,4 @@ GAN 的损失函数表示为: $min_G \ max_D V(D, G) = E_{x ～ p_{data}}[log(D(
 - $D(x) \rightarrow 0.5$，判别器难以判断一个真实数据的分类情况
 
 但是在实际情况中，可能由于神经网络架构的限制，GAN 无法达到理论上的最优状态。
+

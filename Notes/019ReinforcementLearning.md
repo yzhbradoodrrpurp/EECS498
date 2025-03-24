@@ -58,7 +58,7 @@ Markov Property: 当前的状态包含了所有必要的信息来决定未来的
 
 当 $Q^{\pi}(s, a)$ 最大时，其对应的 $\pi$ 就是 $\pi^*$。
 
-Bellman Equation: $Q^*(s, a) = E_{r, s'}[r + \gamma \ max \ Q^*(s', a')]$
+Bellman Equation: $Q^{*}(s, a) = E_{r, s'}[r + \gamma \ \max Q^{*}(s', a')]$
 
 直观地解释 Bellman Equation 就是说，当前最大的 Q = 当前的奖励 $r$ + 折扣因子 $\gamma$ 乘以下一状态的最大 Q。执行动作 a 后，我们获得一个奖励 r 并进入新的状态 s'，此时我们能获得的最大奖励就是在 s' 选择最优动作 a' 时所得到的 Q' 并乘以折扣因子 $\gamma$ 考虑未来的不确定性。通过迭代 Bellman Equation 就可以找到最优的 $Q^*(s, a)$。
 
