@@ -21,7 +21,7 @@
 
 - [Fully-Connected Neural Networks](Assignments/A3/fully_connected_networks.ipynb): This is the further version of Two-Layer Nets that consists of much more linear layers and activation functions. In addition, you will also utilize **different gradient descent strategies like SGD, SGD + Momentum, RMSProp and Adam** to rev up the process and optimize the results. Last but not least, the assignment will also walk you through another regularization strategy called **Dropout** which differs between training time and test time. The network is also trained on CIFAR-10 dataset. The reference to gradient descent strategies is [here](Notes/006optimization.md) and reference to Dropout is [here](Notes/010ConvolutionalNeuralNetworks.md#Dropout).
 
-- [Convolutional Neural Networks](Assignments/A3/convolutional_networks.ipynb): This assignment will walk you through the implementation of **convolutional layer, Kaiming Initialization, pooling layer and batch normalization both in 1D and 2D**. Finally you will build up your own deep CNN network on your own without the aid of PyTorch modules. You should see a huge process in the accuracy of Image Classification trained on CIFAR-10 dataset due to the powerful CNN architecture and know why CNN is far better than just MLP. The reference to CNN is [here](Notes/010ConvolutionalNeuralNetworks.md).
+- [Convolutional Neural Networks](Assignments/A3/convolutional_networks.ipynb): This assignment will walk you through the implementation of **convolutional layer, Kaiming Initialization, pooling layer and batch normalization both in 1D and 2D**. Finally you will build up your own deep CNN network on your own without the aid of PyTorch modules. You should see a huge progress in the accuracy of Image Classification trained on CIFAR-10 dataset due to the powerful CNN architecture and know why CNN is far better than just MLP. The reference to CNN is [here](Notes/010ConvolutionalNeuralNetworks.md).
 
 ### A4
 
@@ -38,7 +38,7 @@
 
 ### A6
 
-- [Generative Adversarial Networks](Assignments/A6/generative_adversarial_networks.ipynb): The content of this assignment is about **Generative Adversarial Networks** or GANs for short. It will demonstrate how to stack up a **generator** and a **discriminator**. Aside from that, it will also talk about how to implement the generator loss and discriminator loss in two different approaches. Since GANs are extremely sensitive and finicky to hyperparameters, they are trained on MNIST dataset for the sake of simplicity.
+- [Generative Adversarial Networks](Assignments/A6/generative_adversarial_networks.ipynb): The content of this assignment is about **Generative Adversarial Networks** or GANs for short. It will demonstrate how to stack up a **generator** and a **discriminator**. Aside from that, it will also talk about how to implement the generator loss and discriminator loss in two different approaches. Since GANs are extremely sensitive and finicky to hyperparameters, they are trained on MNIST dataset for the sake of simplicity. The reference to GANs is [here](Notes/018GenerativeModels.md/#Generative-Adversarial-Networks).
 
 ## Schedule
 
