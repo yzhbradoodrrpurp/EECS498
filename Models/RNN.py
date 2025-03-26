@@ -80,3 +80,24 @@ class RNN(torch.nn.Module):
         tokens = torch.stack(tokens, dim=1)  # (N, max_length, out_dim)
 
         return tokens
+
+
+if __name__ == '__main__':
+    X = torch.randint(0, 100, (32, 15, 1), dtype=torch.float)
+    y = torch.randint(0, 100, (32, 15, 1), dtype=torch.float)
+
+    model = RNN(input_dimensions=1, hidden_dimensions=10, output_dimensions=1, max_length=20)
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3, momentum=0.9)
+    epochs = range(10)
+
+    for epoch in epochs:
+        y_pred = model.train_forward(X)
+        loss = criterion(y_pred, y)
+
+        print(f"Epoch: {epoch}, Loss: {loss:.4f}")
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
