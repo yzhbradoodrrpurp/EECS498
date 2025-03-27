@@ -76,7 +76,7 @@ class ResNet(torch.nn.Module):
         self.residual_blocks = torch.nn.Sequential(*residual_blocks)
 
         # add fully-connected layers to the end
-        self.fully_connected = FullyConnectedLayer(channels[-1], 100, 10)
+        self.fully_connected = FullyConnectedLayer(channels[-1], (channels[-1] + num_classes) // 2, num_classes)
 
     def forward(self, X):
         N, C, H, W = X.shape
