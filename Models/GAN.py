@@ -56,6 +56,7 @@ class GAN(nn.Module):
 
         if X is None:
             mode = 'test'
+            noise = torch.randn(64, 3, 32, 32)
         else:
             mode = 'train'
             noise = torch.randn_like(X)
@@ -74,8 +75,8 @@ if __name__ == '__main__':
     X = torch.randint(0, 256, (64, 3, 32, 32), dtype=torch.float)
 
     model = GAN(channels=(3, 8, 16, 32, 64, 128), num_classes=2)
-    optimizer_G = optim.Adam(model.generator.parameters(), lr=1e-3, betas=(0.5, 0.999))
-    optimizer_D = optim.Adam(model.discriminator.parameters(), lr=1e-3, betas=(0.5, 0.999))
+    optimizer_G = optim.Adam(model.generator.parameters(), lr=1e-5, betas=(0.5, 0.999))
+    optimizer_D = optim.Adam(model.discriminator.parameters(), lr=1e-4, betas=(0.5, 0.999))
     epochs = range(20)
 
     for epoch in epochs:
@@ -84,7 +85,7 @@ if __name__ == '__main__':
         generator_loss = (scores_generated[:, 0].sigmoid().log() * -1).mean()
         discriminator_loss = (-scores[:, 1].sigmoid().log() - (1 - scores_generated[:, 0].sigmoid()).log()).mean()
 
-        print(f"Epoch: {epoch}, Discriminator Loss: {discriminator_loss.item():.4f}, Generator Loss: {generator_loss.item():.4f}")
+        print(f"Epoch: {epoch}, Generator Loss: {generator_loss.item():.4f}, Discriminator Loss: {discriminator_loss.item():.4f}")
 
         optimizer_G.zero_grad()
         optimizer_D.zero_grad()
