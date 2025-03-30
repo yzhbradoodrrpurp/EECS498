@@ -9,7 +9,7 @@ import torch
 
 class LSTMSeq2Seq(torch.nn.Module):
 
-    def __init__(self, input_dim, hidden_dim, output_dim, max_seq_length, dtype=torch.float, device='cpu'):
+    def __init__(self, input_dim, hidden_dim, max_seq_length, dtype=torch.float, device='cpu'):
         super().__init__()
 
         self.Wx = torch.nn.Parameter(torch.empty(input_dim, 4 * hidden_dim, dtype=dtype, device=device))  # (D, 4H)
@@ -27,7 +27,7 @@ class LSTMSeq2Seq(torch.nn.Module):
             torch.nn.Linear(hidden_dim, hidden_dim),
             torch.nn.LayerNorm(hidden_dim),
             torch.nn.ReLU(),
-            torch.nn.Linear(hidden_dim, output_dim),
+            torch.nn.Linear(hidden_dim, hidden_dim),
         )
 
     def forward(self, X, h0=None, c0=None):
@@ -63,11 +63,12 @@ class LSTMSeq2Seq(torch.nn.Module):
             h_next = o * c_next.tanh()  # (N, H)
 
         start_token = torch.zeros(N, D, dtype=X.dtype, device=X.device)
+        input = start_token
         outputs = []
 
         # Decoder
         for t in range(self.max_seq_length):
-            feature_map = start_token @ self.Wx + h_next @ self.Wh + self.b
+            feature_map = input @ self.Wx + h_next @ self.Wh + self.b
 
             i = feature_map[:, 0:H]  # (N, H)
             f = feature_map[:, H:2 * H]  # (N, H)
@@ -78,6 +79,7 @@ class LSTMSeq2Seq(torch.nn.Module):
             h_next = o * c_next.tanh()  # (N, H)
 
             output = self.fully_connected(h_next)  # (N, O)
+            input = output
             outputs.append(output)
 
         outputs = torch.stack(outputs, dim=1)  # (N, max_seq_length, O)
@@ -88,12 +90,11 @@ class LSTMSeq2Seq(torch.nn.Module):
 if __name__ == '__main__':
     N, T, D = 32, 15, 16
     H, max_seq_length = 16, 16
-    O = 16
 
     X = torch.randn(N, T, D)
-    y = torch.randn(N, max_seq_length, O)
+    y = torch.randn(N, max_seq_length, D)
 
-    model = LSTMSeq2Seq(D, H, O, max_seq_length, dtype=torch.float, device='cpu')
+    model = LSTMSeq2Seq(D, H, max_seq_length, dtype=torch.float, device='cpu')
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=1e-1, momentum=0.9)
 
