@@ -46,6 +46,14 @@ class SelfAttention(torch.nn.Module):
 
         return scores
 
+class MultiHeadSelfAttention(torch.nn.Module):
+
+    def __init__(self):
+        pass
+
+    def forward(self, X):
+        pass
+
 class MLP(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super().__init__()
