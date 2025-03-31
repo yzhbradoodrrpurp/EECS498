@@ -10,6 +10,7 @@ import math
 class SelfAttention(torch.nn.Module):
     def __init__(self, input_dim, query_dim, value_dim, dtype=torch.float, device='cpu'):
         """
+        NOTE: single-head attention layer
 
         :param input_dim: dimension of input X
         :param query_dim: dimension of query and key
