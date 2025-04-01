@@ -245,13 +245,9 @@ class DecoderBlock(torch.nn.Module):
     def forward(self, previous_outputs):
         """
 
-        :param context: (N, T, D)
         :param previous_outputs: (N, X, D) NOTE: X is the length of previous outputs
         :return:
         """
-        # print(len(value))
-        # context, previous_outputs = value
-
         feature_map = self.masked_self_attention(previous_outputs) + self.residual_shortcut1(previous_outputs)  # (N, X, D)
         feature_map = self.layer_norm1(feature_map)  # (N, X, D)
 
@@ -291,7 +287,6 @@ class Decoder(torch.nn.Module):
 
         for i in range(self.max_seq_len):
             previous_outputs = torch.cat(answers, dim=1)  # (N, X, D)
-            # print(previous_outputs.shape)
 
             next_output_distribution = self.model(previous_outputs)  # (N, X, D)
             word_distribution = self.linear(next_output_distribution)  # (N, X, vocab_size)
