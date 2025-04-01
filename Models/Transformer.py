@@ -8,7 +8,7 @@ import torch
 import math
 
 class SelfAttention(torch.nn.Module):
-    def __init__(self, input_dim, num_heads=1, dtype=torch.float, device='cpu'):
+    def __init__(self, input_dim, num_heads=1, masked=False, dtype=torch.float, device='cpu'):
         """
         NOTE: single-head attention layer
 
@@ -22,6 +22,7 @@ class SelfAttention(torch.nn.Module):
 
         self.num_heads = num_heads  # H
         self.input_dim = input_dim  # D
+        self.masked = masked
 
         assert input_dim % num_heads == 0, 'input_dim must be divisible by num_heads.'
 
@@ -51,6 +52,12 @@ class SelfAttention(torch.nn.Module):
         value = value.view(N, T, H, D // H).permute(0, 2, 1, 3).contiguous()  # (N, H, T, head_dim)
 
         alignment_scores = query @ key.transpose(2, 3) / math.sqrt(head_dim)  # (N, H, T, T)
+
+        if self.masked:
+            mask = torch.triu(torch.ones(T, T, dtype=X.dtype, device=X.device), diagonal=1)  # 将 T*T 的 1 矩阵的对角线及以下的部分替换成0
+            mask[mask == 1] = float('-inf')
+            alignment_scores += mask
+
         attention_weights = torch.nn.functional.softmax(alignment_scores, dim=-1)  # (N, H, T, T)
 
         scores = attention_weights @ value  # (N, H, T, head_dim)
@@ -83,7 +90,7 @@ class MLP(torch.nn.Module):
         scores = self.model(X)
         return scores
 
-class TransformerBlock(torch.nn.Module):
+class EncoderBlock(torch.nn.Module):
     def __init__(self, input_dim, num_heads=1, dtype=torch.float, device='cpu'):
         """
 
@@ -95,7 +102,7 @@ class TransformerBlock(torch.nn.Module):
         """
         super().__init__()
 
-        self.self_attention = SelfAttention(input_dim, num_heads, dtype=dtype, device=device)
+        self.self_attention = SelfAttention(input_dim, num_heads, masked=False, dtype=dtype, device=device)
         # `torch.nn.Identity` 不改变输入
         self.residual_shortcut1 = torch.nn.Identity()
         # Transformer 中使用 Layer Normalization
@@ -162,10 +169,8 @@ class Encoder(torch.nn.Module):
         self.word_embedding = WordEmbedding(vocab_size, input_dim)
         # 给词向量进行位置编码
         self.positional_encoding = PositionalEncoding(max_seq_len, input_dim)
-        self.transformer_blocks = [TransformerBlock(input_dim, num_heads) for _ in range(num_blocks)]
-        self.model = torch.nn.Sequential(*self.transformer_blocks)
-        # # 将结果词向量转换为在整个字典中得分的分布
-        # self.linear = torch.nn.Linear(input_dim, vocab_size)
+        self.encoder_blocks = [EncoderBlock(input_dim, num_heads) for _ in range(num_blocks)]
+        self.model = torch.nn.Sequential(*self.encoder_blocks)
 
     def forward(self, num):
         """
@@ -179,12 +184,128 @@ class Encoder(torch.nn.Module):
         # scores = self.linear(Y)  # (N, T, vocab_size)
         return Y
 
-class Decoder(torch.nn.Module):
-    def __init__(self):
-        pass
+class CrossAttention(torch.nn.Module):
+    def __init__(self, input_dim, num_heads, dtype=torch.float, device='cpu'):
+        super().__init__()
 
-    def forward(self, X):
-        pass
+        self.input_dim = input_dim
+        self.num_heads = num_heads
+
+        assert input_dim % num_heads == 0, 'input_dim must be divisible by num_heads.'
+
+        self.query_linear = torch.nn.Linear(input_dim, input_dim, dtype=dtype, device=device)
+        self.key_linear = torch.nn.Linear(input_dim, input_dim, dtype=dtype, device=device)
+        self.value_linear = torch.nn.Linear(input_dim, input_dim, dtype=dtype, device=device)
+
+    def forward(self, previous_output, context):
+        """
+
+        :param previous_output: (N, X, D)
+        :param context: (N, T, D)
+        :return: (N, T, D)
+        """
+        N, T, D = context.shape
+        X = previous_output.shape[1]
+        H = self.num_heads
+        head_dim = D // H
+
+        query = self.query_linear(previous_output)  # (N, X, D)
+        query = query.view(N, X, H, D // H).permute(0, 2, 1, 3).contiguous()  # (N, H, X, head_dim)
+
+        key = self.key_linear(context)  # (N, T, D)
+        key = key.view(N, T, H, D // H).permute(0, 2, 1, 3).contiguous()  # (N, H, T, head_dim)
+
+        value = self.value_linear(context)  # (N, T, D)
+        value = value.view(N, T, H, D // H).permute(0, 2, 1, 3).contiguous()  # (N, H , T, head_dim)
+
+        alignment_scores = query @ key.transpose(2, 3) / math.sqrt(head_dim)  # (N, H, X, T)
+        attention_weights = torch.nn.functional.softmax(alignment_scores, dim=-1)  # (N, H, X, T)
+
+        scores = attention_weights @ value  # (N, H, X, head_dim)
+        scores = scores.permute(0, 2, 1, 3).contiguous().view(N, X, -1)  # (N, X, D)
+
+        return scores
+
+class DecoderBlock(torch.nn.Module):
+    def __init__(self, input_dim, num_heads=1, dtype=torch.float, device='cpu'):
+        super().__init__()
+
+        self.masked_self_attention = SelfAttention(input_dim, num_heads, masked=True, dtype=dtype, device=device)
+        self.residual_shortcut1 = torch.nn.Identity()
+        self.layer_norm1 = torch.nn.LayerNorm(input_dim)
+
+        self.cross_attention = CrossAttention(input_dim, num_heads, dtype=dtype, device=device)
+        self.residual_shortcut2 = torch.nn.Identity()
+        self.layer_norm2 = torch.nn.LayerNorm(input_dim)
+
+        self.fully_connected = MLP(input_dim, input_dim, input_dim)
+        self.layer_norm3 = torch.nn.LayerNorm(input_dim)
+        self.residual_shortcut3 = torch.nn.Identity()
+
+    def forward(self, previous_outputs):
+        """
+
+        :param context: (N, T, D)
+        :param previous_outputs: (N, X, D) NOTE: X is the length of previous outputs
+        :return:
+        """
+        # print(len(value))
+        # context, previous_outputs = value
+
+        feature_map = self.masked_self_attention(previous_outputs) + self.residual_shortcut1(previous_outputs)  # (N, X, D)
+        feature_map = self.layer_norm1(feature_map)  # (N, X, D)
+
+        feature_map = self.cross_attention(previous_outputs, self.context)  # (N, X, D)
+        feature_map = self.layer_norm2(feature_map)  # (N, X, D)
+
+        feature_map = self.fully_connected(feature_map) + self.residual_shortcut3(feature_map)  # (N, X, D)
+        feature_map = self.layer_norm3(feature_map)  # (N, X, D)
+
+        return feature_map  # (N, X, D)
+
+class Decoder(torch.nn.Module):
+    def __init__(self, input_dim, num_heads=1, num_blocks=8, max_seq_length=32, vocab_size=500, dtype=torch.float, device='cpu'):
+        super().__init__()
+
+        self.max_seq_len = max_seq_length
+
+        self.word_embedding = WordEmbedding(vocab_size, input_dim)
+        self.decoder_blocks = [DecoderBlock(input_dim, num_heads, dtype=dtype, device=device) for _ in range(num_blocks)]
+        self.model = torch.nn.Sequential(*self.decoder_blocks)
+        # 将结果词向量转换为在整个字典中得分的分布
+        self.linear = torch.nn.Linear(input_dim, vocab_size)
+
+    def forward(self, context):
+        """
+
+        :param context: (N, T, D)
+        :return:
+        """
+        N = context.shape[0]
+        D = context.shape[-1]
+
+        DecoderBlock.context = context
+
+        start_token = self.word_embedding(torch.zeros(N, 1, dtype=torch.long))  # start token id is 0
+        answers = [start_token]  # every element shape: (N, D)
+
+        for i in range(self.max_seq_len):
+            previous_outputs = torch.cat(answers, dim=1)  # (N, X, D)
+            # print(previous_outputs.shape)
+
+            next_output_distribution = self.model(previous_outputs)  # (N, X, D)
+            word_distribution = self.linear(next_output_distribution)  # (N, X, vocab_size)
+            word_distribution = torch.nn.functional.softmax(word_distribution, dim=-1)  # (N, X)
+
+            next_word = word_distribution.argmax(dim=-1).to(torch.float).multinomial(num_samples=1)  # (N, 1) 从 X 个中随机采样出 1 个
+            next_token = self.word_embedding(next_word)  # (N, D)
+
+            answers.append(next_token)
+
+        answers = torch.cat(answers, dim=1)  # (N, max_seq_length, D)
+        answer_scores = self.linear(answers)  # (N, max_seq_length, 500)
+
+        return answer_scores
 
 class Transformer(torch.nn.Module):
     def __init__(self, input_dim, num_heads=1, num_blocks=8, max_seq_len=32, vocab_size=500, dtype=torch.float,
@@ -192,35 +313,39 @@ class Transformer(torch.nn.Module):
         super().__init__()
 
         self.encoder = Encoder(input_dim, num_heads, num_blocks, max_seq_len, vocab_size, dtype, device)
-        self.decoder = Decoder()
+        self.decoder = Decoder(input_dim, num_heads, num_blocks, max_seq_len, vocab_size, dtype, device)
 
     def forward(self, X):
-        encoded_output = self.encoder(X)
+        context = self.encoder(X)  # (N, T, D)
+        answer_scores = self.decoder(context)  # (N, max_seq_length, D)
+        return answer_scores
 
 
 if __name__ == '__main__':
 
-    # TODO: Positional Embedding and Word Embedding
+    # NOTE: Word Embedding 中字典的大小为 500，有 8 组 prompt，每组 prompt 的长度为 20 个 token
+    # NOTE: 每个词向量的维度为 32，Transformer 模型由 4 个 Transformer Block 组成，
+    # NOTE: 多头注意力的头数为 4
+    N, T, D = 8, 20, 32
+    max_seq_length = 30
+    vocab_size = 500
+    H = 4
 
-    # NOTE: 生成 0～500 范围内的整数，有 8 组 prompt，每组 prompt 的长度为 20 个 token
-    prompts_id = torch.randint(0, 500, (8, 20))
-    answers_id = torch.randint(0, 500, (8, 20))
-    N, T = prompts_id.shape
+    prompts_id = torch.randint(0, vocab_size, (N, T))
+    answers_id = torch.randint(0, vocab_size, (N, max_seq_length))
 
-    # NOTE: 每个词向量的维度为 32，Transformer 模型由 4 个 Transformer Block 组成
-    # NOTE: 一组 prompt 中最多有 20 个 token，Word Embedding 中字典的大小为 500
-    model = Encoder(32, 8, 25, vocab_size=500, dtype=torch.float, device='cpu')
-    optimizer = torch.optim.SGD(model.parameters(), lr=1e-1, momentum=0.9)
+    model = Transformer(D, H, 4, max_seq_length, vocab_size, dtype=torch.float, device='cpu')
+    optimizer = torch.optim.SGD(model.parameters(), lr=1, momentum=0.9)
     criterion = torch.nn.CrossEntropyLoss()
     epochs = range(20)
 
     for epoch in epochs:
-        scores = model(prompts_id)  # (N, T, 500)
+        answer_scores = model(prompts_id)  # (N, max_seq_length + 1, D)
+        answer_scores = answer_scores[:, 1:, :]  # (N, max_seq_length, D)
 
-        scores_flat = scores.view(N * T, -1)
-        answers_id_flat = answers_id.view(N * T,)
-
-        loss = criterion(scores_flat, answers_id_flat)
+        answer_scores_ = answer_scores.reshape(N * max_seq_length, -1)
+        answers_id_ = answers_id.reshape(N * max_seq_length)
+        loss = criterion(answer_scores_, answers_id_)
 
         print(f'Epoch: {epoch}, Loss: {loss.item():.4f}')
 
