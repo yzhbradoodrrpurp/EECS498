@@ -290,7 +290,7 @@ class Decoder(torch.nn.Module):
 
             next_output_distribution = self.model(previous_outputs)  # (N, X, D)
             word_distribution = self.linear(next_output_distribution)  # (N, X, vocab_size)
-            word_distribution = torch.nn.functional.softmax(word_distribution, dim=-1)  # (N, X)
+            word_distribution = torch.nn.functional.softmax(word_distribution, dim=-1)  # (N, X, vocab_size)
 
             next_word = word_distribution.argmax(dim=-1).to(torch.float).multinomial(num_samples=1)  # (N, 1) 从 X 个中随机采样出 1 个
             next_token = self.word_embedding(next_word)  # (N, D)
